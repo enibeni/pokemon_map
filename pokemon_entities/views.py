@@ -3,6 +3,7 @@ import json
 
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Pokemon, PokemonEntity
 
@@ -73,6 +74,17 @@ def show_pokemon(request, pokemon_id):
             "pokemon_id": requested_pokemon.previous_evolution.id,
             "img_url": request.build_absolute_uri(requested_pokemon.previous_evolution.photo.url)
         }
+
+    try:
+        next_evolution = requested_pokemon.next_evolution.get()
+        if next_evolution:
+            pokemon_info["next_evolution"] = {
+                "title_ru": next_evolution.title_ru,
+                "pokemon_id": next_evolution.id,
+                "img_url": request.build_absolute_uri(next_evolution.photo.url)
+            }
+    except ObjectDoesNotExist:
+        pass
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     pokemon_entities = requested_pokemon.entities.all()
