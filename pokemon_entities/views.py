@@ -56,27 +56,27 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    requested_pokemon = Pokemon.objects.get(id=pokemon_id)
+    serialized_pokemon = Pokemon.objects.get(id=pokemon_id)
 
     pokemon_info = {
-        "pokemon_id": requested_pokemon.id,
-        "title_ru": requested_pokemon.title_ru,
-        "title_en": requested_pokemon.title_en,
-        "title_jp": requested_pokemon.title_jp,
-        "description": requested_pokemon.description,
-        "img_url": request.build_absolute_uri(requested_pokemon.photo.url),
-        "previous_evolution": requested_pokemon.previous_evolution
+        "pokemon_id": serialized_pokemon.id,
+        "title_ru": serialized_pokemon.title_ru,
+        "title_en": serialized_pokemon.title_en,
+        "title_jp": serialized_pokemon.title_jp,
+        "description": serialized_pokemon.description,
+        "img_url": request.build_absolute_uri(serialized_pokemon.photo.url),
+        "previous_evolution": serialized_pokemon.previous_evolution
     }
 
-    if requested_pokemon.previous_evolution:
+    if serialized_pokemon.previous_evolution:
         pokemon_info["previous_evolution"] = {
-            "title_ru": requested_pokemon.previous_evolution.title_ru,
-            "pokemon_id": requested_pokemon.previous_evolution.id,
-            "img_url": request.build_absolute_uri(requested_pokemon.previous_evolution.photo.url)
+            "title_ru": serialized_pokemon.previous_evolution.title_ru,
+            "pokemon_id": serialized_pokemon.previous_evolution.id,
+            "img_url": request.build_absolute_uri(serialized_pokemon.previous_evolution.photo.url)
         }
 
     try:
-        next_evolution = requested_pokemon.next_evolution.get()
+        next_evolution = serialized_pokemon.next_evolution.get()
         if next_evolution:
             pokemon_info["next_evolution"] = {
                 "title_ru": next_evolution.title_ru,
@@ -87,7 +87,7 @@ def show_pokemon(request, pokemon_id):
         pass
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    pokemon_entities = requested_pokemon.entities.all()
+    pokemon_entities = serialized_pokemon.entities.all()
     for pokemon_entity in pokemon_entities:
         add_pokemon(
             folium_map, pokemon_entity.lat,
