@@ -56,29 +56,29 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    serialized_pokemon = Pokemon.objects.get(id=pokemon_id)
+    pokemon = Pokemon.objects.get(id=pokemon_id)
 
-    pokemon_info = {
-        "pokemon_id": serialized_pokemon.id,
-        "title_ru": serialized_pokemon.title_ru,
-        "title_en": serialized_pokemon.title_en,
-        "title_jp": serialized_pokemon.title_jp,
-        "description": serialized_pokemon.description,
-        "img_url": request.build_absolute_uri(serialized_pokemon.photo.url),
-        "previous_evolution": serialized_pokemon.previous_evolution
+    serialized_pokemon = {
+        "pokemon_id": pokemon.id,
+        "title_ru": pokemon.title_ru,
+        "title_en": pokemon.title_en,
+        "title_jp": pokemon.title_jp,
+        "description": pokemon.description,
+        "img_url": request.build_absolute_uri(pokemon.photo.url),
+        "previous_evolution": pokemon.previous_evolution
     }
 
-    if serialized_pokemon.previous_evolution:
-        pokemon_info["previous_evolution"] = {
-            "title_ru": serialized_pokemon.previous_evolution.title_ru,
-            "pokemon_id": serialized_pokemon.previous_evolution.id,
-            "img_url": request.build_absolute_uri(serialized_pokemon.previous_evolution.photo.url)
+    if pokemon.previous_evolution:
+        serialized_pokemon["previous_evolution"] = {
+            "title_ru": pokemon.previous_evolution.title_ru,
+            "pokemon_id": pokemon.previous_evolution.id,
+            "img_url": request.build_absolute_uri(pokemon.previous_evolution.photo.url)
         }
 
     try:
-        next_evolution = serialized_pokemon.next_evolution.get()
+        next_evolution = pokemon.next_evolution.get()
         if next_evolution:
-            pokemon_info["next_evolution"] = {
+            serialized_pokemon["next_evolution"] = {
                 "title_ru": next_evolution.title_ru,
                 "pokemon_id": next_evolution.id,
                 "img_url": request.build_absolute_uri(next_evolution.photo.url)
@@ -87,7 +87,7 @@ def show_pokemon(request, pokemon_id):
         pass
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    pokemon_entities = serialized_pokemon.entities.all()
+    pokemon_entities = pokemon.entities.all()
     for pokemon_entity in pokemon_entities:
         add_pokemon(
             folium_map, pokemon_entity.lat,
@@ -96,5 +96,5 @@ def show_pokemon(request, pokemon_id):
         )
 
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon_info
+        'map': folium_map._repr_html_(), 'pokemon': serialized_pokemon
     })
